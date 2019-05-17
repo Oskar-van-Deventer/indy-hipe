@@ -29,7 +29,7 @@ A consumer contacts a customer service agent of his health insurance company, an
 
 Unfortunately, by itself, the parties DIDcom agents will be unable to bypass the firewalls involved and exchange DIDcom messages. Therefore XMPP is called to the rescue to serve as the transport protocol which is capable with firewalls. Once the firewalls issue is solved, DIDcom can be put to use in all of these cases.  
 
-- The XMPP protocol is a popular protocol for chat and messaging. It has a client-server structure that bypasses any firewall issues.
+**The XMPP protocol is a popular protocol for chat and messaging. It has a client-server structure that bypasses any firewall issues.**
 
 ## Tutorial
 [tutorial]: #tutorial
@@ -110,7 +110,7 @@ The following is an example of a complient DIDCom-over-XMPP service endpoint.
 }
 ```
 
-#### Userpart
+#### Userpart generation
 
 There are multiple methods how the userpart of the DIDCom-over-XMPP serviceEndpoint may be generated.
 
