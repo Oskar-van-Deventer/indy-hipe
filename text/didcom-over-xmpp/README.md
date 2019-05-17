@@ -116,7 +116,7 @@ There are multiple methods how the userpart of the DIDCom-over-XMPP serviceEndpo
 
 *Editor's note: Should the description below be interpreted as informative, or should there be any signalling to indicate which userpart-generating method was used?*
 
-**Method 1: Use same userpart as for human user**
+**Method 1: Same userpart as for human user**
 
 In this method, the userpart is the same as used for human-to-human XMPP-based chat, and the resource part is removed. Here is an example.
 
