@@ -73,50 +73,19 @@ XMPP uses 3 types of messages:
 
 ### DIDCom over XMPP
 
-For use of XMPP, it is recommended to use [Openfire Server](https://www.igniterealtime.org/projects/openfire/) open source project, including 2 plugins to enable server caching and message carbon copy. This will enable sending DIDcom to mulitple endpoints of the same person.
-
-*Editor's note: add proper references to the 2 plugins*
-
 #### Use of MESSAGE
 
-The DIDCom JSON text is send as plain text as XMPP MESSAGE, without any additional identifiers.
+The DIDCom JSON text shall be sent send as plaintext XMPP MESSAGE, without any additional identifiers.
 
 #### Service endpoint
 
-The service end point of a DIDCom-over-XMPP service is derived from the XMPP address by preceding the domain part of the XMPP address with "did." and remove the resources part, i.e. the "/" and anything behind it. The reason for removing the resources part is that DIDCom messages are addressed to the person/entity associated with the DID, and not to any particular device. 
+A DIDCom-over-XMPP service shall comply to the following.
 
-Here are some examples of this convention.
-
-```
-- xmpp:alice@foo.com
-- xmpp:alice@foo.com/phone
---> xmpp:alice@did.foo.com
-
-- xmpp:bob@bar.com
-- xmpp:bob@bar.com/laptop
-- xmpp:bob@bar.com/phone
- --> xmpp:bob@did.bar.com
-```
-
-Here is an example of the "service" property of a DID Document with an XMPP service endpoint. Note that there is no resource (like "/laptop") indicated. In normal XMPP a message can only be send to one resource, even if there are multiple resources online (for example /phone and /tablet). If a message is send to a XMPP address without using an specific resource, the server chooses which resource gets the message. The is usually based on importance of the resources (which the user can configure). However the routing logic of the XMPP server can be changed to follow different rules.
-
-```
-{
-  "service": [{
-    "id": "did:example:123456789abcdefghi;xmpp",
-    "type": "XmppService",
-    "serviceEndpoint": "xmpp:bob@did.bar.com"
-  }]
-}
-```
-
-XMPP servers handle messages sent to a user@host (or "bare") JID with no resource by delivering that message only to the resource with the highest priority for the target user. Some server implementations, however, have chosen to send these messages to all of the online resources for the target user. If the target user is online with multiple resources when the original message is sent, a conversation ensues on one of the user's devices; if the user subsequently switches devices, parts of the conversation may end up on the alternate device, causing the user to be confused, misled, or annoyed.
-
-To solve this the plugin "Message Carbons" will be used. It will ensure that all of target user devices get both sides of all conversations in order to avoid user confusion. As a pleasant side-effect, information about the current state of a conversation is shared between all of a user's clients that implement this protocol.
-
-#### ABNF
-
-Here is a formal [ABNF](ftp://ftp.rfc-editor.org/in-notes/std/std68.txt) description of the XMPP service endpoint syntax.
+1. The id shall have a DID fragment "#xmpp".
+2. The type shall be "XmppService". 
+3. The serviceEndpoint
+   - shall not have a resource part (i.e. "/...resource...")
+   - shall comply to the following [ABNF](ftp://ftp.rfc-editor.org/in-notes/std/std68.txt).
 
 ```
 xmpp-service-endpoint = "xmpp:" userpart "@did." domainpart
@@ -125,39 +94,115 @@ xmpp-service-endpoint = "xmpp:" userpart "@did." domainpart
   CHAR = %x01-7F
 ```
 
+The reason for not allowing a resources part is that DIDCom messages are addressed to the person/entity associated with the DID, and not to any particular device. 
+
+A receiving XMPP client shall identify an incoming XMPP message as a DIDCom message, if the serviceEndpoint complies to the above. It shall pass any DIDCom message to its DIDCom agent.
+
+The following is an example of a complient DIDCom-over-XMPP service endpoint.
+
+```
+{
+  "service": [{
+    "id": "did:example:123456789abcdefghi#xmpp",
+    "type": "XmppService",
+    "serviceEndpoint": "xmpp:bob@did.bar.com"
+  }]
+}
+```
+
+#### Userpart
+
+There are multiple methods how the userpart of the DIDCom-over-XMPP serviceEndpoint may be generated.
+
+*Editor's note: Should the description below be interpreted as informative, or should there be any signalling to indicate which userpart-generating method was used?*
+
+**Method 1: Use same userpart as for human user**
+
+In this method, the userpart is the same as used for human-to-human XMPP-based chat, and the resource part is removed. Here is an example.
+
+```
+Human-to-human XMPP address: xmpp:alice@foo.com/phone
+-->
+DIDCom-over-XMPP serviceEndpoint: xmpp:alice@did.foo.com
+```
+
+The advantage of this method is its simplicity. An XMPP servicer needs to be configured only once to support this convention. No further registration actions are needed by any of the the users for its XMPP clients.
+
+The disadvantage of this method is that it creates a strong correlation point, which may conflict with privacy requirements.
+
+*Editor's note: More advantages or disadvantages?*
+
+**Method 2: Random userpart**
+
+In this method, the userpart is randomly generated by either the XMPP client or the XMPP server, and it is rotated at a regular basis. Here is an example.
+
+```
+DIDCom-over-XMPP serviceEndpoint: xmpp:RllH91rcFdE@did.foo.com
+```
+
+The advantage of this method is low correlation and hence high privacy. If the DIDCom-over-XMPP serviceEndpoint is rotated after each set of XMPP exchange ("session"), then it cannot be correlated with subsequent XMPP exchanges.
+
+The disadvantage of this method is the high operational complexity of this method. It requires a client to keep a reserve of random XMPP addresses with the XMPP server. It significantly increases the routing tables of the XMPP server. It also places a burden on both DIDCom agents, because of the rapid rotation of DID Documents.
+
+*Editor's note: More advantages or disadvantages?*
+
+**Method 3: DID-derived user part**
+
+In this method, the userpart is derived from the DID.
+
+*Editor's note: Kyle, how should this derivation work? The userpart cannot be the DID itself, as a DID contains the colon (":") character, which is not allowed in the userpart of an XMPP address.*
+
+The advantage of this method is that it directly associates a DID to an XMPP address. Unlike method 1, there is no correlation with a human-to-human XMPP address. Unlike method 2, the DIDCom-over-XMPP may remain stable for the lifetime of the DID.
+
+The disadvantage of this method is that it remains a weak correlation point, as it exposes the DID. Moreover, identifier-purists may not like the layer violation by this method, and may argue that XMPP addressing should be kept separate from DID identification.
+
+*Editor's note: More advantages or disadvantages?*
+
+**Method 4: Any and all of the above**
+
+The above methods may co-exist and they may even be used in combination. The selected method will differ per use case and usage.
+
+- Method 1 may be used by a public organisation that gets lots of incoming traffic. 
+- Method 2 may be used by a group of threathened journalists for maximum privacy. 
+- Method 3 may be used by a beer-vending machine that respects the privacy of its users. 
+- Method 4 may be used by a DIDCom agent with high versatility.
+
 ## Reference
 [reference]: #reference
 
-*Editor's note: add references*
+For use of XMPP, it is recommended to use [Openfire Server](https://www.igniterealtime.org/projects/openfire/) open source project, including 2 plugins to enable server caching and message carbon copy. This will enable sending DIDcom to mulitple endpoints of the same person.
+
+*Editor's note: Add references to the 2 plugins*
+
+XMPP servers handle messages sent to a user@host (or "bare") XMPP address with no resource by delivering that message only to the resource with the highest priority for the target user. Some server implementations, however, have chosen to send these messages to all of the online resources for the target user. If the target user is online with multiple resources when the original message is sent, a conversation ensues on one of the user's devices; if the user subsequently switches devices, parts of the conversation may end up on the alternate device, causing the user to be confused, misled, or annoyed.
+
+To solve this is is recommended to use the plugin "Message Carbons". It will ensure that all of target user devices get both sides of all conversations in order to avoid user confusion. As a pleasant side-effect, information about the current state of a conversation is shared between all of a user's clients that implement this protocol.
+
+*Editor's note: Add reference to "Message Carbons"*
 
 ## Drawbacks
 [drawbacks]: #drawbacks
 
-Having a human-readable userpart may be a strong correlation point, especially if the userpart is identical to one used for human-to-human XMPP chat. Two privacy-enhancing approaches have been suggested.
-
-- Use the DID in the userpart. The XMPP URL is not meant to human-readable anyway. Potential issue: mixes addressing between layers.
-- Provide large numbers of one-time-use service endpoints in the DID Document. Potential issue: adds complexity and dependencies.
-
-*Editor's note: further analysis is needed*
+*Editor's note: Add drawbacks*
 
 ## Rationale and alternatives
 [alternatives]: #alternatives
 
 All service endpoint examples from W3C's [Data Model and Syntaxes for Decentralized Identifiers (DIDs)](https://w3c-ccg.github.io/did-spec/) are HTTP. So if a consumer would want to be reachable for incoming DIDCom messages, then it should run an HTTP service on its consumer device and take actions to open firewalls (and handle network-address translations) towards its device. Such scenario is technically completely unrealistic, not to mention the security implications of such scenario.
 
-XMPP was specifically designed for icoming messages to consumer devices. XMPP's client-server structure overcomes any firewall issues.
+XMPP was specifically designed for incoming messages to consumer devices. XMPP's client-server structure overcomes any firewall issues.
 
 ## Prior art
 [prior-art]: #prior-art
 
-*Editor's note: add prior art*
+*Editor's note: Add prior art*
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-See "Drawbacks" above
+*Editor's note: Any unresolved questions?*
 
 ## Security considerations
 [security]: #security-considerations
 
-*Editor's note: add security considerations*
+*Editor's note: Add security considerations*
