@@ -71,13 +71,13 @@ XMPP uses 3 types of messages:
 
 ![XMPP_architecture.jpg](XMPP_architecture.jpg)
 
-### DIDCom over XMPP
+## DIDCom over XMPP
 
-#### Use of MESSAGE
+### Use of MESSAGE
 
 The DIDCom JSON text shall be sent send as plaintext XMPP MESSAGE, without any additional identifiers.
 
-#### Service endpoint
+### Service endpoint
 
 A DIDCom-over-XMPP service shall comply to the following.
 
@@ -110,7 +110,7 @@ The following is an example of a complient DIDCom-over-XMPP service endpoint.
 }
 ```
 
-#### Userpart generation
+### Userpart generation
 
 There are multiple methods how the userpart of the DIDCom-over-XMPP serviceEndpoint may be generated.
 
