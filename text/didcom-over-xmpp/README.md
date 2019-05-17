@@ -148,7 +148,11 @@ The disadvantage of this method is the high operational complexity of this metho
 
 **Method 3: DID-derived user part**
 
-In this method, the userpart is derived from the DID.
+In this method, the userpart is derived from the DID. Here is an example.
+
+```
+Editor's note: add example 
+```
 
 *Editor's note: Kyle, how should this derivation work? The userpart cannot be the DID itself, as a DID contains the colon (":") character, which is not allowed in the userpart of an XMPP address.*
 
