@@ -20,6 +20,8 @@ DIDCom-over-XMPP enables:
 
 and all of this in spite of the presence of firewalls.
 
+*Editor's note: A reference should be added to [Propose HIPE: Transports  #94](https://github.com/hyperledger/indy-hipe/pull/94)*
+
 ## Motivation
 [motivation]: #motivation
 
@@ -38,21 +40,14 @@ The DIDCom-over-XMPP feature provides an architecture for the transport of DIDCo
 
 ### DIDCom
 
-The DIDCom connection protocol is specified in [Hyperledger Indy Hipe 0031](https://github.com/hyperledger/indy-hipe/tree/master/text/0031-connection-protocol). The purpose of the protocol is to set up a trusted electronic relationship between two parties (natural person, legal person, ...). Technically, the trust relationship involves the following
+The DIDCom wire message format is specified in [HIPE 0028-wire-message-format](https://github.com/hyperledger/indy-hipe/tree/master/text/0028-wire-message-format). It can carry among others the DIDCom connection protocol, as specified in [Hyperledger Indy Hipe 0031](https://github.com/hyperledger/indy-hipe/tree/master/text/0031-connection-protocol). The purpose of the latter protocol is to set up a trusted electronic relationship between two parties (natural person, legal person, ...). Technically, the trust relationship involves the following
 
 - Univocal identification of the parties within the context of the relationship
 - Secure exchange of keys to encrypt and verify messages between agents of the parties
 - Secure exchange of service end points to be reachable at in the future
+- Secure exchange of verifiable credentials and other messages that require secure exchange
 
 W3C specifies [Data Model and Syntaxes for Decentralized Identifiers (DIDs)](https://w3c-ccg.github.io/did-spec/). This specification introduces Decentralized Identifiers, DIDs, for identification. A DID can be resolved into a DID Document that contains the associated keys and service endpoints, see also W3C's [A Primer for Decentralized Identifiers](https://w3c-ccg.github.io/did-primer/). W3C provides a [DID Method Registry](https://w3c-ccg.github.io/did-method-registry/) for a complete list of all known DID Method specifications. Many of the DID methods use an unambiguous source of truth to resolve a DID Document, e.g. a well governed public blockchain. An exception is the [Peer DID method](https://dhh1128.github.io/peer-did-method-spec/index.html) that relies on the peers, i.e. parties in the trusted electronic relationship to maintain the DID Document.
-
-The DIDCom connection protocol has several steps to create a trusted electronic relationship.
-- Step 0: Invitation to Connect, an out-of-band (open) invitation to connect from the *invitor*
-- Step 1: Connection Request, an encrypted request from the *invitee* to the *invitor* containg a pairwise DID and the associated DID Document
-- Step 2: Connected Response, an encrypted response from the *invitor* to the *invitee* containg a pairwise DID and the associated DID Document
-- Step 3: Trust building, any further verification steps and exchange of verifiable credentials to enhance the trust in the newly created electronic relationship. 
-
-The result is a trusted electronic relationship with a DID pair and associated DID Documents, ready for use in transactions. The DIDCom connecton protocol also includes steps to read (get current DID Document from the other), update (e.g. key rotation) and delete.
 
 ### XMPP
 
@@ -73,11 +68,11 @@ XMPP uses 3 types of messages:
 
 ## DIDCom over XMPP
 
-### Use of MESSAGE
+### Use of MESSAGE (normative)
 
-The DIDCom JSON text shall be sent send as plaintext XMPP MESSAGE, without any additional identifiers.
+A DIDCom wire message shall be sent send as plaintext XMPP MESSAGE, without any additional identifiers.
 
-### Service endpoint
+### Service endpoint (normative)
 
 A DIDCom-over-XMPP service shall comply to the following.
 
@@ -110,7 +105,7 @@ The following is an example of a complient DIDCom-over-XMPP service endpoint.
 }
 ```
 
-### Userpart generation
+### Userpart generation (informative)
 
 There are multiple methods how the userpart of the DIDCom-over-XMPP serviceEndpoint may be generated.
 
@@ -145,31 +140,6 @@ The advantage of this method is low correlation and hence high privacy. If the D
 The disadvantage of this method is the high operational complexity of this method. It requires a client to keep a reserve of random XMPP addresses with the XMPP server. It significantly increases the routing tables of the XMPP server. It also places a burden on both DIDCom agents, because of the rapid rotation of DID Documents.
 
 *Editor's note: More advantages or disadvantages?*
-
-**Method 3: DID-derived user part**
-
-In this method, the userpart is derived from the DID. Here is an example.
-
-```
-Editor's note: add example 
-```
-
-*Editor's note: Kyle, how should this derivation work? The userpart cannot be the DID itself, as a DID contains the colon (":") character, which is not allowed in the userpart of an XMPP address.*
-
-The advantage of this method is that it directly associates a DID to an XMPP address. Unlike method 1, there is no correlation with a human-to-human XMPP address. Unlike method 2, the DIDCom-over-XMPP may remain stable for the lifetime of the DID.
-
-The disadvantage of this method is that it remains a weak correlation point, as it exposes the DID. Moreover, identifier-purists may not like the layer violation by this method, and may argue that XMPP addressing should be kept separate from DID identification.
-
-*Editor's note: More advantages or disadvantages?*
-
-**Method 4: Any and all of the above**
-
-The above methods may co-exist and they may even be used in combination. The selected method will differ per use case and usage.
-
-- Method 1 may be used by a public organisation that gets lots of incoming traffic. 
-- Method 2 may be used by a group of threathened journalists for maximum privacy. 
-- Method 3 may be used by a beer-vending machine that respects the privacy of its users. 
-- Method 4 may be used by a DIDCom agent with high versatility.
 
 ## Reference
 [reference]: #reference
