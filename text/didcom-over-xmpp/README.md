@@ -1,3 +1,5 @@
+SUPERSEDED BY [HYPERLEDGER ARIES VERSION OF DIDCOM-OVER-XMPP](https://github.com/hyperledger/aries-rfcs/pull/24)
+
 # DIDCom over XMPP
 - Name: didcom-over-xmpp
 - Authors: Oskar van Deventer (oskar.vandeventer@tno.nl), Galit Rahim (galit.rahim@tno.nl), Alexander Blom (alexander.blom@bloqzone.com)
